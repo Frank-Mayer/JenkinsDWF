@@ -3,6 +3,7 @@ import moment from "moment";
 import { getEndpointFor } from "./getEndpoint.js";
 import { onrejected } from "./onrejected.js";
 import express from "express";
+import compression from "compression";
 import { loadServerConfig } from "./config.js";
 import { normalize, join, relative } from "path/posix";
 import { svg } from "./Image/svg.js";
@@ -13,6 +14,12 @@ moment.locale("de");
 config();
 
 const app = express();
+app.use(
+  compression({
+    level: 9,
+  })
+);
+
 const serverConfig = await loadServerConfig();
 
 const bPath = normalize(serverConfig.basepath) || "/";

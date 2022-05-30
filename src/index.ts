@@ -8,8 +8,6 @@ import { loadServerConfig } from "./config.js";
 import { normalize, join, relative } from "path/posix";
 import { svg } from "./Image/svg.js";
 
-moment.locale("de");
-
 // import env
 config();
 
@@ -21,6 +19,10 @@ app.use(
 );
 
 const serverConfig = await loadServerConfig();
+
+if (serverConfig.locale) {
+  moment.locale(serverConfig.locale);
+}
 
 const bPath = normalize(serverConfig.basepath) || "/";
 

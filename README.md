@@ -10,6 +10,7 @@ Example
   "port": 12345,
   "basepath": "/dwf",
   "debug": true,
+  "locale": "de",
   "projects": [
     {
       "id": "001",
@@ -27,6 +28,7 @@ This config makes the project `myproject` available at `http://localhost:12345/d
 - **port**: Port of the server (`number`).
 - basepath: Add a basepath to the listener. Default is `/` (`string`).
 - debug: Enable debug console log (`boolean`). Default is `false`.
+- locale: Localization of the output (`string`). Default is `es-US`.
 - **projects**: `Array` of projects.
   - id: Where this project should be avaliable at (`string`). Default is `name` of the same project.
   - **name**: Name to be used when fetching data from the api (`string`).

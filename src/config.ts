@@ -17,6 +17,7 @@ const configSchema: Schema = {
     port: { type: "number" },
     basepath: { type: "string" },
     debug: { type: "boolean" },
+    locale: { type: "string" },
     projects: {
       id: "/config/projects",
       type: "array",
@@ -48,6 +49,7 @@ export type config = {
   port: number;
   basepath: string;
   debug: boolean;
+  locale?: string;
   projects: Array<projectConfig>;
 };
 

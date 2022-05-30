@@ -1,6 +1,11 @@
-import { readFile } from "fs";
+import { readFile, existsSync } from "fs";
 import { Validator } from "jsonschema";
 import type { Schema } from "jsonschema";
+
+if (!existsSync("./config.json")) {
+  console.error("config.json not found");
+  process.exit(1);
+}
 
 const validator = new Validator();
 

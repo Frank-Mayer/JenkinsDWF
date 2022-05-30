@@ -1,9 +1,11 @@
 {
-  "host": "0.0.0.0",
+  "host": "localhost",
   "port": 12345,
-  "basepath": "/",
+  "basepath": "/test",
+  "debug": true,
   "projects": [
     {
+      "id": "@mztikk/RFReborn",
       "name": "RFReborn",
       "endpoint": "https://www.mztikk.de/jenkins",
       "type": "jenkins"

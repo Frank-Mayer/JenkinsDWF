@@ -8,7 +8,7 @@ const endpointCache = new Map<projectConfig["type"], Endpoint>();
 
 export const getEndpointFor = async (project: string): Promise<Endpoint> => {
   const conf = await loadServerConfig().catch(onrejected);
-  const projectConf = conf.projects.find((x) => x.name === project);
+  const projectConf = conf.projects.find((x) => x.id === project);
 
   if (!projectConf) {
     throw new Error(`Project ${project} not found`);

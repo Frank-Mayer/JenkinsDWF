@@ -11,6 +11,7 @@ const configSchema: Schema = {
     host: { type: "string" },
     port: { type: "number" },
     basepath: { type: "string" },
+    debug: { type: "boolean" },
     projects: {
       id: "/config/projects",
       type: "array",
@@ -18,9 +19,11 @@ const configSchema: Schema = {
         id: "/config/projects/item",
         properties: {
           name: { type: "string" },
+          id: { type: "string" },
           endpoint: { type: "string" },
           type: { type: "string", enum: ["jenkins", "github"] },
         },
+        required: ["name", "endpoint", "type"],
       },
       required: ["endpoint", "type"],
     },
@@ -29,6 +32,7 @@ const configSchema: Schema = {
 };
 
 export type projectConfig = {
+  id: string;
   name: string;
   endpoint: string;
   type: "jenkins" | "github";
@@ -38,6 +42,7 @@ export type config = {
   host: string;
   port: number;
   basepath: string;
+  debug: boolean;
   projects: Array<projectConfig>;
 };
 
@@ -51,7 +56,7 @@ export const loadServerConfig = () =>
           if (err) {
             return reject(err);
           } else {
-            const confObj = JSON.parse(data);
+            const confObj: config = JSON.parse(data);
             const validationResult = validator.validate(confObj, configSchema, {
               nestedErrors: true,
               allowUnknownAttributes: false,
@@ -59,6 +64,12 @@ export const loadServerConfig = () =>
             });
 
             if (validationResult.valid) {
+              for (const proj of confObj.projects) {
+                if (!proj.id) {
+                  proj.id = proj.name;
+                }
+              }
+
               cachedConfig = confObj;
               resolve(confObj);
             } else {
@@ -68,7 +79,7 @@ export const loadServerConfig = () =>
                 );
               }
 
-              reject(validationResult);
+              process.exit(1);
             }
           }
         });

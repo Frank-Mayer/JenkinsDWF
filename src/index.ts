@@ -25,6 +25,18 @@ for (const project of serverConfig.projects) {
   console.log(`Registering ${project.name} <${project.type}>`);
   app.get(join(bPath, project.id), async (req, res) => {
     try {
+      if (serverConfig.debug) {
+        const remote =
+          req.headers["x-forwarded-for"] || req.socket.remoteAddress;
+        const now = new Date().toISOString();
+
+        if (remote) {
+          console.debug(`${remote} > ${now} > ${req.url}`);
+        } else {
+          console.debug(`${now} > ${req.url}`);
+        }
+      }
+
       cacheControl(res);
 
       const project = relative(bPath, req.path);
@@ -40,16 +52,6 @@ for (const project of serverConfig.projects) {
       res.status(200);
       res.set("Content-Type", "image/svg+xml");
       res.send(svg(text));
-
-      // switch (req.params.type) {
-      //   case "svg":
-      //     res.set("Content-Type", "image/svg+xml");
-      //     res.send(svg(text));
-      //     break;
-      //   default:
-      //     res.set("Content-Type", "text/plain");
-      //     res.send(text);
-      // }
     } catch (err: any) {
       res.status(500);
 

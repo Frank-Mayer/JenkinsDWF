@@ -5,6 +5,7 @@ import { onrejected } from "./onrejected.js";
 import express from "express";
 import { loadServerConfig } from "./config.js";
 import { normalize, join, relative } from "path/posix";
+import { svg } from "./Image/svg.js";
 
 moment.locale("de");
 
@@ -22,7 +23,7 @@ const cacheControl = (res: express.Response) => {
 
 for (const project of serverConfig.projects) {
   console.log(`Registering ${project.name} <${project.type}>`);
-  app.get(join(bPath, project.id) + ".svg", async (req, res) => {
+  app.get(join(bPath, project.id), async (req, res) => {
     try {
       cacheControl(res);
 
@@ -34,7 +35,21 @@ for (const project of serverConfig.projects) {
         .getLastFailedTimestamp("RFReborn")
         .catch(onrejected);
 
-      res.send(moment.duration(moment.now() - ts).humanize());
+      const text = moment.duration(moment.now() - ts).humanize();
+
+      res.status(200);
+      res.set("Content-Type", "image/svg+xml");
+      res.send(svg(text));
+
+      // switch (req.params.type) {
+      //   case "svg":
+      //     res.set("Content-Type", "image/svg+xml");
+      //     res.send(svg(text));
+      //     break;
+      //   default:
+      //     res.set("Content-Type", "text/plain");
+      //     res.send(text);
+      // }
     } catch (err: any) {
       res.status(500);
 

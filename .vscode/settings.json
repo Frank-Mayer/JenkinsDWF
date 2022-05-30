@@ -8,6 +8,8 @@
     "**/Thumbs.db": true,
     "*.js": true,
     "node_modules": true,
-    ".yarn": true
+    ".yarn": true,
+    "Jenkins": true,
+    "**/*.js": true
   }
 }

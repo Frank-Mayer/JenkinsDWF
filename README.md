@@ -8,18 +8,20 @@ Example
 {
   "host": "localhost",
   "port": 12345,
-  "basepath": "/test",
+  "basepath": "/dwf",
   "debug": true,
   "projects": [
     {
-      "id": "@mztikk/RFReborn",
-      "name": "RFReborn",
-      "endpoint": "https://www.mztikk.de/jenkins",
+      "id": "001",
+      "name": "myproject",
+      "endpoint": "https://www.yoursite.de/jenkins",
       "type": "jenkins"
     }
   ]
 }
 ```
+
+This config makes the project `myproject` available at `http://localhost:12345/dwf/001`
 
 - **host**: Hostname of the server (`string`).
 - **port**: Port of the server (`number`).

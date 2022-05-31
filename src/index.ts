@@ -1,11 +1,10 @@
 import { config } from "dotenv";
 import moment from "moment";
 import { getEndpointFor } from "./getEndpoint.js";
-import { onrejected } from "./onrejected.js";
 import express from "express";
 import compression from "compression";
 import { loadServerConfig } from "./config.js";
-import { normalize, join, relative } from "path/posix";
+import { normalize, relative, join, extname } from "path/posix";
 import { svg } from "./Image/svg.js";
 
 // import env
@@ -24,56 +23,70 @@ if (serverConfig.locale) {
   moment.locale(serverConfig.locale);
 }
 
-const bPath = normalize(serverConfig.basepath) || "/";
+let bPath = normalize(serverConfig.basepath) || "/";
+if (!bPath.startsWith("/")) {
+  bPath = "/" + bPath;
+}
+if (!bPath.endsWith("/")) {
+  bPath = bPath + "/";
+}
 
 const cacheControl = (res: express.Response) => {
   res.set("Cache-control", "no-store");
+  return res;
 };
 
-for (const project of serverConfig.projects) {
-  console.log(`Registering ${project.name} <${project.type}>`);
-  app.get(join(bPath, project.id), async (req, res) => {
-    try {
-      if (serverConfig.debug) {
-        const remote =
-          req.headers["x-forwarded-for"] || req.socket.remoteAddress;
-        const now = new Date().toISOString();
+app.get(join(bPath, "*"), (req, res) => {
+  const path = relative(bPath, req.path);
+  console.log(`GET > ${path}`);
 
-        if (remote) {
-          console.debug(`${remote} > ${now} > ${req.url}`);
-        } else {
-          console.debug(`${now} > ${req.url}`);
-        }
-      }
+  const extension = extname(path);
 
-      cacheControl(res);
+  let resolved = false;
 
-      const project = relative(bPath, req.path);
-
-      const endpoint = await getEndpointFor(project).catch(onrejected);
-
-      const ts = await endpoint
-        .getLastFailedTimestamp("RFReborn")
-        .catch(onrejected);
-
-      const text = moment.duration(moment.now() - ts).humanize();
-
-      res.status(200);
-      res.set("Content-Type", "image/svg+xml");
-      res.send(svg(text));
-    } catch (err: any) {
-      res.status(500);
-
-      if (err.message) {
-        res.send(err.message);
-      } else if (typeof err === "string") {
-        res.send(err);
-      } else {
-        res.json(err);
-      }
+  for (const ep_ of serverConfig.endpoints) {
+    if (resolved) {
+      break;
     }
-  });
-}
+
+    if (path.startsWith(ep_.path)) {
+      resolved = true;
+      getEndpointFor(ep_).map(
+        (ep) => {
+          const filename = relative(ep_.path, path);
+          const project = filename.substring(
+            0,
+            filename.length - extension.length
+          );
+
+          ep.getLastFailedTimestamp(project)
+            .then((result) => {
+              const lastFailed = moment
+                .duration(Date.now() - result)
+                .humanize();
+
+              switch (extension) {
+                case ".svg":
+                  cacheControl(res).status(200).send(svg(lastFailed));
+                  break;
+                default:
+                  cacheControl(res).status(404).send("Invalid extension");
+              }
+            })
+            .catch((err) => {
+              console.error(err);
+              cacheControl(res)
+                .status(500)
+                .send(typeof err === "string" ? err : JSON.stringify(err));
+            });
+        },
+        () => {
+          cacheControl(res).status(404).send(svg("404"));
+        }
+      );
+    }
+  }
+});
 
 app.listen(serverConfig.port, serverConfig.host, () => {
   console.log(

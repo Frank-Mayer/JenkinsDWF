@@ -1,32 +1,25 @@
-import { loadServerConfig } from "./config.js";
 import { JenkinsEndpoint } from "./Jenkins/JenkinsEndpoint.js";
 import type { Endpoint } from "./Endpoint.js";
-import type { projectConfig } from "./config.js";
-import { onrejected } from "./onrejected.js";
+import type { endpointConfig } from "./config.js";
+import { btoa } from "./b64.js";
+import { Option } from "./Option.js";
 
-const endpointCache = new Map<projectConfig["type"], Endpoint>();
+const endpointCache = new Map<string, Endpoint>();
 
-export const getEndpointFor = async (project: string): Promise<Endpoint> => {
-  const conf = await loadServerConfig().catch(onrejected);
-  const projectConf = conf.projects.find((x) => x.id === project);
+export const getEndpointFor = (endpoint: endpointConfig): Option<Endpoint> => {
+  const key = btoa(JSON.stringify(endpoint));
 
-  if (!projectConf) {
-    throw new Error(`Project ${project} not found`);
-  }
+  if (endpointCache.has(key)) {
+    return Option.some(endpointCache.get(key)!);
+  } else {
+    switch (endpoint.type) {
+      case "jenkins":
+        const jenkinsEndpoint = new JenkinsEndpoint(endpoint);
+        endpointCache.set(key, jenkinsEndpoint);
+        return Option.some(jenkinsEndpoint);
+    }
 
-  if (endpointCache.has(projectConf.type)) {
-    return endpointCache.get(projectConf.type)!;
-  }
-
-  switch (projectConf.type) {
-    case "jenkins":
-      const ep = new JenkinsEndpoint();
-      endpointCache.set(projectConf.type, ep);
-      return ep;
-
-    default:
-      throw new Error(
-        `No valid endpoint for project type ${projectConf.type} found`
-      );
+    console.error(`Unknown endpoint <${endpoint.type}>`);
+    return Option.none();
   }
 };

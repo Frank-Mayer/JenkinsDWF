@@ -18,29 +18,27 @@ const configSchema: Schema = {
     basepath: { type: "string" },
     debug: { type: "boolean" },
     locale: { type: "string" },
-    projects: {
-      id: "/config/projects",
+    endpoints: {
+      id: "/config/endpoints",
       type: "array",
       items: {
-        id: "/config/projects/item",
+        id: "/config/endpoints/item",
         properties: {
-          name: { type: "string" },
-          id: { type: "string" },
-          endpoint: { type: "string" },
+          path: { type: "string" },
+          url: { type: "string" },
           type: { type: "string", enum: ["jenkins", "github"] },
         },
-        required: ["name", "endpoint", "type"],
+        required: ["path", "url", "type"],
       },
       required: ["endpoint", "type"],
     },
   },
-  required: ["host", "port", "projects"],
+  required: ["host", "port", "endpoints"],
 };
 
-export type projectConfig = {
-  id: string;
-  name: string;
-  endpoint: string;
+export type endpointConfig = {
+  path: string;
+  url: string;
   type: "jenkins" | "github";
 };
 
@@ -50,7 +48,7 @@ export type config = {
   basepath: string;
   debug: boolean;
   locale?: string;
-  projects: Array<projectConfig>;
+  endpoints: Array<endpointConfig>;
 };
 
 let cachedConfig: config | null = null;
@@ -58,10 +56,11 @@ let cachedConfig: config | null = null;
 export const loadServerConfig = () =>
   cachedConfig
     ? Promise.resolve(cachedConfig)
-    : new Promise<config>((resolve, reject) => {
+    : new Promise<config>((resolve) => {
         readFile("./config.json", "utf8", (err, data) => {
           if (err) {
-            return reject(err);
+            console.error(err.name, err.message);
+            process.exit(1);
           } else {
             const confObj: config = JSON.parse(data);
             const validationResult = validator.validate(confObj, configSchema, {
@@ -71,12 +70,6 @@ export const loadServerConfig = () =>
             });
 
             if (validationResult.valid) {
-              for (const proj of confObj.projects) {
-                if (!proj.id) {
-                  proj.id = proj.name;
-                }
-              }
-
               cachedConfig = confObj;
               resolve(confObj);
             } else {

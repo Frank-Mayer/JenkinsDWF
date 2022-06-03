@@ -1,27 +1,30 @@
 package io.frankmayer.dwf
 
-import com.google.gson.GsonBuilder
+import com.fasterxml.jackson.databind.ObjectMapper
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import io.frankmayer.dwf.config.Config
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 import java.io.File
 
+
 @SpringBootApplication
 class DaysWithoutFailureApplication
 
 fun main() {
-    val json = GsonBuilder().setPrettyPrinting().create()
+    val mapper = ObjectMapper(YAMLFactory())
+    mapper.findAndRegisterModules()
+    val configFile = File("./config.yaml")
 
-    val configFile = File("./config.json")
     val config = if (configFile.exists()) {
-        json.fromJson(configFile.readText(), Config::class.java)
+        mapper.readValue(configFile, Config::class.java)
     } else {
         configFile.createNewFile()
         Config()
     }
 
     if (configFile.canWrite()) {
-        configFile.writeText(json.toJson(config) + "\n")
+        mapper.writeValue(configFile, config)
     }
 
     System.setProperty(

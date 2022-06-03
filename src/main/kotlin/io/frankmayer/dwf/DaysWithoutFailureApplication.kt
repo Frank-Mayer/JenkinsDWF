@@ -2,6 +2,7 @@ package io.frankmayer.dwf
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
+import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
 import io.frankmayer.dwf.config.Config
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -12,8 +13,14 @@ import java.io.File
 class DaysWithoutFailureApplication
 
 fun main() {
-    val mapper = ObjectMapper(YAMLFactory())
-    mapper.findAndRegisterModules()
+    val mapper = ObjectMapper(
+        YAMLFactory
+            .builder().
+            disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+            .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
+            .build()
+    ).findAndRegisterModules()
+
     val configFile = File("./config.yaml")
 
     val config = if (configFile.exists()) {

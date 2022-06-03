@@ -10,13 +10,7 @@ import java.io.File
 
 
 @SpringBootApplication
-class DaysWithoutFailureApplication {
-
-        companion object {
-            @JvmStatic
-            var config: Config? = null
-        }
-}
+class DaysWithoutFailureApplication
 
 fun main() {
     val env = System.getenv()
@@ -38,7 +32,7 @@ fun main() {
         Config()
     }
 
-    DaysWithoutFailureApplication.config = config
+    Config.instance = config
 
     if (configFile.canWrite()) {
         mapper.writeValue(configFile, config)

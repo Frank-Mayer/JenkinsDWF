@@ -29,7 +29,7 @@ fun main() {
         "org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration"
     )
     System.setProperty("server.error.whitelabel.enabled", "false")
-    
+
     System.setProperty("server.servlet.context-path", config.basepath)
     System.setProperty("server.port", config.port.toString())
     System.setProperty("server.address", config.address)

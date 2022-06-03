@@ -20,6 +20,12 @@ endpoints:
     timezone: Europe/Berlin
 ```
 
+Jenkins project `foo` would be avaliable at `http://localhost:12345/jenkins/foo`
+
+```markdown
+![jenkins/foo](http://localhost:12345/jenkins/foo.svg)
+```
+
 ## .env
 
 ```bash

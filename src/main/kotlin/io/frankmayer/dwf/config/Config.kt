@@ -7,5 +7,5 @@ data class Config (
     val debug: Boolean = false,
     val locale: String = "en",
     val timezone: String = "UTC",
-    val endpoints: List<Endpoint> = listOf(Endpoint())
+    val endpoints: List<EndpointConfig> = listOf(EndpointConfig())
 )

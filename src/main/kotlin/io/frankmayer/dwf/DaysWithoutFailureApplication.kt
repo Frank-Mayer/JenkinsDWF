@@ -10,9 +10,17 @@ import java.io.File
 
 
 @SpringBootApplication
-class DaysWithoutFailureApplication
+class DaysWithoutFailureApplication {
+
+        companion object {
+            @JvmStatic
+            var config: Config? = null
+        }
+}
 
 fun main() {
+    val env = System.getenv()
+
     val mapper = ObjectMapper(
         YAMLFactory
             .builder()
@@ -29,6 +37,8 @@ fun main() {
         configFile.createNewFile()
         Config()
     }
+
+    DaysWithoutFailureApplication.config = config
 
     if (configFile.canWrite()) {
         mapper.writeValue(configFile, config)

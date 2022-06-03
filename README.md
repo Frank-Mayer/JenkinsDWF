@@ -4,16 +4,22 @@ Days without failure
 
 ## config.yaml
 
-```yml
----
-address: "localhost"
-port: 8080
-basepath: "/"
+```yaml
+address: localhost
+port: 12345
+basepath: /
 debug: false
-locale: "en"
-timezone: "UTC"
+timezone: Europe/Berlin
 endpoints:
-  - path: "j"
-    url: "http://localhost/jenkins"
-    type: "JENKINS"
+  - path: jenkins
+    url: https://www.myserver.de/jenkins
+    type: JENKINS
+    timezone: Europe/Berlin
+```
+
+## .env
+
+```bash
+JENKINS_USER=<Jenkins Nutzername>
+JENKINS_TOKEN=<Jenkins api key>
 ```

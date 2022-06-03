@@ -1,9 +1,8 @@
 package io.frankmayer.dwf.config
 
 import java.time.ZoneId
-import java.util.*
 
-data class Config (
+data class Config(
     val address: String = "localhost",
     val port: UInt = 8080u,
     val basepath: String = "/",

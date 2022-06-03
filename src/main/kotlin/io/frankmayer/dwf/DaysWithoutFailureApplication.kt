@@ -15,8 +15,8 @@ class DaysWithoutFailureApplication
 fun main() {
     val mapper = ObjectMapper(
         YAMLFactory
-            .builder().
-            disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
+            .builder()
+            .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
             .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
             .build()
     ).findAndRegisterModules()

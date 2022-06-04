@@ -9,14 +9,14 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.*
 
-class JenkinsEndpoint(private val config: EndpointConfig) : Endpoint {
+class JenkinsEndpoint(private val config: EndpointConfig) : Endpoint() {
     private var dotenv = dotenv()
     private val jenkinsToken: String = dotenv.get("JENKINS_TOKEN")
     private val jenkinsUser: String = dotenv.get("JENKINS_USER")
     private var token: String = Base64.getEncoder().encodeToString(("$jenkinsUser:$jenkinsToken").toByteArray())
     private val objectMapper = ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-    override fun get(project: String): Long? {
+    override fun request(project: String): Long? {
         val url =
             URL("${config.url}/job/$project/api/json?pretty=false&tree=lastBuild[timestamp],lastUnsuccessfulBuild[timestamp],lastFailedBuild[timestamp]")
         val connection: HttpURLConnection = url.openConnection() as HttpURLConnection

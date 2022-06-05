@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class MainController {
-    private val endpointCache = mutableMapOf<EndpointType, Endpoint>()
+    private val endpointCache = mutableMapOf<String, Endpoint>()
     private val svg = Svg()
     private var config: Config? = null
 
@@ -86,7 +86,7 @@ class MainController {
     }
 
     private fun getEndpoint(endpoint: EndpointConfig): Endpoint {
-        return endpointCache.getOrPut(endpoint.type) {
+        return endpointCache.getOrPut("${endpoint.type}_${endpoint.url}") {
             when (endpoint.type) {
                 EndpointType.JENKINS -> JenkinsEndpoint(endpoint)
                 EndpointType.GITHUB -> GitHubEndpoint(endpoint)

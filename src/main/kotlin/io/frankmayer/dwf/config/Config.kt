@@ -7,7 +7,6 @@ data class Config(
     val port: UInt = 8080u,
     val basepath: String = "/",
     val debug: Boolean = false,
-    val timezone: ZoneId = ZoneId.systemDefault(),
     val endpoints: List<EndpointConfig> = listOf(EndpointConfig())
 ) {
     companion object {

@@ -1,5 +1,6 @@
 package io.frankmayer.dwf
 
+import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory
 import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator
@@ -13,15 +14,19 @@ import java.io.File
 class DaysWithoutFailureApplication
 
 fun main() {
-    val env = System.getenv()
+    val envFile = File("./.env")
+    if (!envFile.exists()) {
+        envFile.createNewFile()
+    }
 
     val mapper = ObjectMapper(
-        YAMLFactory
-            .builder()
+        YAMLFactory.builder()
             .disable(YAMLGenerator.Feature.WRITE_DOC_START_MARKER)
             .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
             .build()
-    ).findAndRegisterModules()
+    )
+    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+    .findAndRegisterModules()
 
     val configFile = File("./config.yaml")
 

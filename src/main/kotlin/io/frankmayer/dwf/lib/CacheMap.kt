@@ -1,20 +1,22 @@
 package io.frankmayer.dwf.lib
 
 import java.time.Duration
-import java.time.Instant
-import java.time.LocalDateTime
-import java.util.*
+import java.util.concurrent.ConcurrentHashMap
 
 class CacheMap<K, V>(private val expired: (K, Duration) -> Boolean) {
-    private val cache = HashMap<K, V>()
-    private val lastWriteAccess = HashMap<K, Long>()
+    private val cache = ConcurrentHashMap<K, V>()
+    private val lastWriteAccess = ConcurrentHashMap<K, Long>()
 
     private fun updateLastWriteAccess(key: K) {
         lastWriteAccess[key] = System.currentTimeMillis()
     }
 
     private fun clearExpired(key: K) {
-        if (lastWriteAccess.containsKey(key) && expired(key, Duration.ofMillis(System.currentTimeMillis() - lastWriteAccess[key]!!))) {
+        if (lastWriteAccess.containsKey(key) && expired(
+                key,
+                Duration.ofMillis(System.currentTimeMillis() - lastWriteAccess[key]!!)
+            )
+        ) {
             remove(key)
         }
     }
@@ -46,5 +48,15 @@ class CacheMap<K, V>(private val expired: (K, Duration) -> Boolean) {
             updateLastWriteAccess(key)
             v
         }
+    }
+
+    fun has(key: K): Boolean {
+        clearExpired(key)
+        return cache.containsKey(key)
+    }
+
+    fun get(key: K): V? {
+        clearExpired(key)
+        return cache[key]
     }
 }

@@ -4,43 +4,61 @@ import com.fasterxml.jackson.databind.DeserializationFeature
 import com.fasterxml.jackson.databind.ObjectMapper
 import io.frankmayer.dwf.api.jenkins.Job
 import io.frankmayer.dwf.config.EndpointConfig
+import io.frankmayer.dwf.lib.Result
 import io.github.cdimascio.dotenv.dotenv
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.Duration
 import java.util.*
 
-class JenkinsEndpoint(private val config: EndpointConfig) : Endpoint() {
+class JenkinsEndpoint(config: EndpointConfig) : Endpoint(config) {
     private var dotenv = dotenv()
-    private val jenkinsToken: String = dotenv.get("JENKINS_TOKEN")
-    private val jenkinsUser: String = dotenv.get("JENKINS_USER")
-    private var token: String = Base64.getEncoder().encodeToString(("$jenkinsUser:$jenkinsToken").toByteArray())
+    private val jenkinsToken: String? = try {
+        dotenv.get("JENKINS_TOKEN")
+    } catch (_: Exception) {
+        null
+    }
+    private val jenkinsUser: String? = try {
+        dotenv.get("JENKINS_USER")
+    } catch (_: Exception) {
+        null
+    }
+    private var token: String? = if (jenkinsUser != null && jenkinsToken != null) { Base64.getEncoder().encodeToString(("$jenkinsUser:$jenkinsToken").toByteArray()) } else { null }
     private val objectMapper = ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
 
-    override fun request(project: String): Long? {
+    override fun request(project: String, workflow: String?): Result<String, String> {
         val url =
             URL("${config.url}/job/$project/api/json?pretty=false&tree=lastBuild[timestamp],lastUnsuccessfulBuild[timestamp],lastFailedBuild[timestamp]")
         val connection: HttpURLConnection = url.openConnection() as HttpURLConnection
         connection.requestMethod = "GET"
-        connection.setRequestProperty("Authorization", "Basic $token")
+        if (token != null) {
+            connection.setRequestProperty("Authorization", "Basic $token")
+        }
         connection.setRequestProperty("Accept", "application/json")
 
         val responseCode = connection.responseCode
         if (responseCode < 200 || responseCode >= 400) {
-            return null
+            return Result.failure("Jenkins responded with $responseCode")
         }
 
         val job = objectMapper.readValue(connection.inputStream, Job::class.java)
 
         if (job.lastBuild == null) {
-            return -1
+            return Result.success(neverWorked)
         }
 
-        val lastFailed = job.lastFailedBuild ?: job.lastUnsuccessfulBuild ?: return -1
+        val lastFailed = job.lastFailedBuild ?: job.lastUnsuccessfulBuild ?: return Result.success(neverFailed)
 
-        return if (job.lastBuild.timestamp > lastFailed.timestamp) {
-            lastFailed.timestamp
+        return if (job.lastBuild.timestamp < lastFailed.timestamp) {
+            Result.success(humanReadable(Duration.ZERO))
         } else {
-            0
+            Result.success(
+                humanReadable(
+                    Duration.ofMillis(
+                        System.currentTimeMillis() - lastFailed.timestamp
+                    )
+                )
+            )
         }
     }
 }

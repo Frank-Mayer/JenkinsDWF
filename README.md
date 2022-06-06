@@ -4,9 +4,9 @@
 [![Kotlin](https://img.shields.io/badge/kotlin-%237F52FF.svg?style=for-the-badge&logo=kotlin&logoColor=white)](https://kotlinlang.org/)
 ![Java](https://img.shields.io/badge/Java_17-%23ED8B00.svg?style=for-the-badge&logo=java&logoColor=white)
 
-Download the latest [Release](https://github.com/Frank-Mayer/days-without-failure/releases/latest)
+Download the latest <a href="https://github.com/Frank-Mayer/days-without-failure/releases/latest">Release <img src="https://img.shields.io/github/v/release/Frank-Mayer/days-without-failure?include_prereleases"></a>
 
-Read the [Dokumentation](https://github.com/Frank-Mayer/days-without-failure/wiki)
+Read the [Documentation](https://github.com/Frank-Mayer/days-without-failure/wiki)
 
 | Software      | Licence            |
 |---------------|--------------------|

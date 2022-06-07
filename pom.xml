@@ -10,7 +10,7 @@
 	</parent>
 	<groupId>io.frank-mayer</groupId>
 	<artifactId>dwf</artifactId>
-	<version>0.0.2-SNAPSHOT</version>
+	<version>0.0.3-SNAPSHOT</version>
 	<name>days-without-failure</name>
 	<description>How long ago was the last build error?</description>
 	<properties>

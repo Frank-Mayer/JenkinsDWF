@@ -11,6 +11,7 @@ import org.apache.commons.io.FilenameUtils
 import org.springframework.scheduling.annotation.Async
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -21,7 +22,11 @@ class MainController {
 
     @GetMapping("/{endpoint}/{file}")
     @Async
-    fun index(@PathVariable("endpoint") endpointName: String, @PathVariable file: String): String {
+    fun index(
+        @PathVariable("endpoint") endpointName: String,
+        @PathVariable file: String,
+        @RequestParam fontSize: String? = null
+    ): String {
         if (!ensureConfigLoaded()) {
             return "Config not loaded"
         }
@@ -34,7 +39,7 @@ class MainController {
         val extension = FilenameUtils.getExtension(file)
         val project = FilenameUtils.removeExtension(file)
 
-        return render(endpoint, project, null, extension)
+        return render(endpoint, project, null, extension, fontSize)
     }
 
     @GetMapping("/{endpoint}/{project}/{file}")
@@ -42,7 +47,8 @@ class MainController {
     fun index(
         @PathVariable("endpoint") endpointName: String,
         @PathVariable("project") projectName: String,
-        @PathVariable file: String
+        @PathVariable file: String,
+        @RequestParam fontSize: String? = null
     ): String {
         if (!ensureConfigLoaded()) {
             return "Config not loaded"
@@ -56,14 +62,15 @@ class MainController {
         val extension = FilenameUtils.getExtension(file)
         val workflow = FilenameUtils.removeExtension(file)
 
-        return render(endpoint, projectName, workflow, extension)
+        return render(endpoint, projectName, workflow, extension, fontSize)
     }
 
     private fun render(
         endpoint: Endpoint,
         project: String,
         workflow: String?,
-        extension: String
+        extension: String,
+        fontSize: String?
     ): String {
         if (!ensureConfigLoaded()) {
             return "Config not loaded"
@@ -71,7 +78,7 @@ class MainController {
 
         return endpoint.get(project, workflow).map({
             when (extension) {
-                "svg" -> svg.render(it)
+                "svg" -> svg.render(it, fontSize)
                 else -> it
             }
         }, { it })

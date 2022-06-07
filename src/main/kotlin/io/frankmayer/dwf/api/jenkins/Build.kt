@@ -3,5 +3,5 @@ package io.frankmayer.dwf.api.jenkins
 import com.fasterxml.jackson.annotation.JsonProperty
 
 data class Build(
-    @JsonProperty("timestamp") val timestamp: Long
+    @JsonProperty("timestamp") val timestamp: Long = 0
 )

@@ -4,11 +4,14 @@ import io.frankmayer.dwf.config.EndpointConfig
 import io.frankmayer.dwf.lib.CacheMap
 import io.frankmayer.dwf.lib.Result
 import io.github.cdimascio.dotenv.dotenv
+import org.slf4j.LoggerFactory
 import java.time.Duration
 import java.util.*
 
 abstract class Endpoint(protected val config: EndpointConfig) {
     private var dotenv = dotenv()
+    private val envCache = HashMap<String, String?>()
+    protected var logger = LoggerFactory.getLogger(this::class.java)
 
     private val cache = CacheMap<String, Result<String, String>> { _, duration ->
         duration.toHours() > 12L
@@ -16,7 +19,13 @@ abstract class Endpoint(protected val config: EndpointConfig) {
 
     fun get(project: String, workflow: String?): Result<String, String> {
         return cache.getOrPut("$project/$workflow") {
-            request(project, workflow)
+            try {
+                request(project, workflow)
+            } catch (e: Exception) {
+                val msg = e.message ?: e.localizedMessage
+                logger.warn(msg)
+                Result.failure(msg)
+            }
         }
     }
 
@@ -36,7 +45,11 @@ abstract class Endpoint(protected val config: EndpointConfig) {
         val varGlobal = "${config.type}_${varName.uppercase(Locale.getDefault())}"
         val varSpecific = "${varGlobal}_${config.path}"
 
-        return try {
+        if (envCache.containsKey(varSpecific)) {
+            return envCache[varSpecific]
+        }
+
+        val value = try {
             dotenv.get(varSpecific)
         } catch (_: Exception) {
             null
@@ -45,5 +58,8 @@ abstract class Endpoint(protected val config: EndpointConfig) {
         } catch (_: Exception) {
             null
         }
+
+        envCache[varSpecific] = value
+        return value
     }
 }

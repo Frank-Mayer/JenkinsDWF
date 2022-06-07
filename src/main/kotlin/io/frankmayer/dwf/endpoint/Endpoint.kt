@@ -5,8 +5,12 @@ import io.frankmayer.dwf.lib.CacheMap
 import io.frankmayer.dwf.lib.Result
 import io.github.cdimascio.dotenv.dotenv
 import org.slf4j.LoggerFactory
+import java.net.HttpURLConnection;
+import java.io.InputStream
+import java.net.URL
 import java.time.Duration
 import java.util.*
+import kotlin.collections.HashMap
 
 abstract class Endpoint(protected val config: EndpointConfig) {
     private var dotenv = dotenv()
@@ -61,5 +65,38 @@ abstract class Endpoint(protected val config: EndpointConfig) {
 
         envCache[varSpecific] = value
         return value
+    }
+
+    protected fun fetch(url: String, reqProp: HashMap<String, String>? = null, method: String = "GET",): Result<InputStream, Int> {
+        val obj = URL(url)
+        val conn = obj.openConnection() as HttpURLConnection
+        conn.readTimeout = 5000
+
+        if (reqProp != null) {
+            for (prop in reqProp) {
+                conn.addRequestProperty(prop.key, prop.value)
+            }
+        } else {
+            conn.addRequestProperty("Accept-Type", "application/json")
+        }
+
+        conn.requestMethod = method
+
+        var status = conn.responseCode
+
+        return if (status in 300..399) {
+            val location = conn.getHeaderField("Location")
+            if (location != null) {
+                fetch(location, reqProp, method)
+            } else {
+                logger.debug("Redirected to $url but no location header found")
+                Result.failure(status)
+            }
+        } else if (status in 200..299) {
+            Result.success(conn.inputStream)
+        } else {
+            logger.debug("Failed to fetch $url with status $status")
+            Result.failure(status)
+        }
     }
 }

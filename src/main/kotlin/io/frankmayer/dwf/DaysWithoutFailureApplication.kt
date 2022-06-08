@@ -25,8 +25,8 @@ fun main() {
             .enable(YAMLGenerator.Feature.MINIMIZE_QUOTES)
             .build()
     )
-    .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
-    .findAndRegisterModules()
+        .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+        .findAndRegisterModules()
 
     val configFile = File("./config.yaml")
 
@@ -43,12 +43,7 @@ fun main() {
         mapper.writeValue(configFile, config)
     }
 
-    System.setProperty(
-        "spring.autoconfigure.exclude",
-        "org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration"
-    )
-    System.setProperty("server.error.whitelabel.enabled", "false")
-
+    System.setProperty("logging.level.root", config.logLevel)
     System.setProperty("server.servlet.context-path", config.basepath)
     System.setProperty("server.port", config.port.toString())
     System.setProperty("server.address", config.address)

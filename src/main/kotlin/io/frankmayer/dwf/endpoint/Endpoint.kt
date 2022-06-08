@@ -15,14 +15,20 @@ import kotlin.collections.HashMap
 abstract class Endpoint(protected val config: EndpointConfig) {
     private var dotenv = dotenv()
     private val envCache = HashMap<String, String?>()
-    protected var logger = LoggerFactory.getLogger(this::class.java)
+    private var logger = LoggerFactory.getLogger(this::class.java)
 
-    private val cache = CacheMap<String, Result<String, String>> { _, duration ->
+    /**
+     * Cache for the api result of the api calls.
+     */
+    private val endpointReqCache = CacheMap<String, Result<String, String>> { _, duration ->
         duration.toHours() > 12L
     }
 
+    /**
+     * Abstraction layer for the actual endpoint call.
+     */
     fun get(project: String, workflow: String?): Result<String, String> {
-        return cache.getOrPut("$project/$workflow") {
+        return endpointReqCache.getOrPut("$project/$workflow") {
             try {
                 request(project, workflow)
             } catch (e: Exception) {
@@ -34,9 +40,7 @@ abstract class Endpoint(protected val config: EndpointConfig) {
     }
 
     /**
-     * - Never failed = -1
-     * - No success after last fail = 0
-     * - Success after last fail = last build - last fail
+     * Request to the endpoints API.
      */
     protected abstract fun request(project: String, workflow: String?): Result<String, String>
 
@@ -45,6 +49,9 @@ abstract class Endpoint(protected val config: EndpointConfig) {
         return duration.toDays().toString() + " days"
     }
 
+    /**
+     * Abstraction layer for the environment variables.
+     */
     protected fun env(varName: String): String? {
         val varGlobal = "${config.type}_${varName.uppercase(Locale.getDefault())}"
         val varSpecific = "${varGlobal}_${config.path}"
@@ -67,6 +74,9 @@ abstract class Endpoint(protected val config: EndpointConfig) {
         return value
     }
 
+    /**
+     * Abstraction layer for the HTTP request.
+     */
     protected fun fetch(url: String, reqProp: HashMap<String, String>? = null, method: String = "GET",): Result<InputStream, Int> {
         val obj = URL(url)
         val conn = obj.openConnection() as HttpURLConnection

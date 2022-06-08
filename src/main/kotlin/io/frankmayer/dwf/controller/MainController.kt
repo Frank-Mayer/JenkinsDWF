@@ -16,8 +16,19 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class MainController {
+    /**
+     * Cache for the endpoint objects.
+     */
     private val endpointCache = mutableMapOf<String, Endpoint>()
+
+    /**
+     * SVG renderer.
+     */
     private val svg = Svg()
+
+    /**
+     * Data from the config file.
+     */
     private var config: Config? = null
 
     @GetMapping("/{endpoint}/{file}")

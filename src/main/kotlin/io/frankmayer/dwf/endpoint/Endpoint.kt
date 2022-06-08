@@ -13,9 +13,9 @@ import java.util.*
 import kotlin.collections.HashMap
 
 abstract class Endpoint(protected val config: EndpointConfig) {
-    private var dotenv = dotenv()
+    private val dotenv = dotenv()
     private val envCache = HashMap<String, String?>()
-    private var logger = LoggerFactory.getLogger(this::class.java)
+    private val logger = LoggerFactory.getLogger(this::class.java)
 
     /**
      * Cache for the api result of the api calls.

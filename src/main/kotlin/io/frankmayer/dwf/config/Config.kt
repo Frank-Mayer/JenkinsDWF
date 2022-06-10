@@ -3,11 +3,11 @@ package io.frankmayer.dwf.config
 import java.time.ZoneId
 
 data class Config(
-    val address: String = "localhost",
-    val port: UInt = 8080u,
-    val basepath: String = "/",
-    val logLevel: String = "WARN",
-    val endpoints: List<EndpointConfig> = listOf(EndpointConfig())
+    var address: String = "localhost",
+    var port: Int = 8080,
+    var basepath: String = "/",
+    var logLevel: String = "WARN",
+    var endpoints: List<EndpointConfig> = listOf(EndpointConfig())
 ) {
     companion object {
         @JvmStatic

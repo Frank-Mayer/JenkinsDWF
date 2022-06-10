@@ -43,23 +43,44 @@ fun main() {
 
         Config.instance = config
 
+        try {
+            System.setProperty("logging.level.root", config.logLevel)
+        } catch (e: Exception) {
+            logger.error("Could not set log level to ${config.logLevel}, resetting to default")
+            config.logLevel = "WARN"
+        }
+
+        try {
+            System.setProperty("server.servlet.context-path", config.basepath)
+        } catch (e: Exception) {
+            logger.error("Could not set basepath to ${config.basepath}, resetting to default")
+            config.basepath = "/"
+        }
+
+        try {
+            System.setProperty("server.port", config.port.toString())
+        } catch (e: Exception) {
+            logger.error("Could not set port to ${config.port}, resetting to default")
+            config.port = 8080
+        }
+
+        try {
+            System.setProperty("server.address", config.address)
+        } catch (e: Exception) {
+            logger.error("Could not set address to ${config.address}")
+            config.address = "localhost"
+        }
+
         if (configFile.canWrite()) {
             mapper.writeValue(configFile, config)
         }
-
-        System.setProperty("logging.level.root", config.logLevel)
-        System.setProperty("server.servlet.context-path", config.basepath)
-        System.setProperty("server.port", config.port.toString())
-        System.setProperty("server.address", config.address)
-    }
-    catch (e: Exception) {
+    } catch (e: Exception) {
         logger.error("Error while initializing application", e)
     }
 
     try {
         runApplication<DaysWithoutFailureApplication>()
-    }
-    catch (e: Exception) {
+    } catch (e: Exception) {
         logger.error("Runtime error", e)
     }
 }

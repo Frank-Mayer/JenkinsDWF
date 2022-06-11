@@ -8,6 +8,16 @@ Download the latest <a href="https://github.com/Frank-Mayer/days-without-failure
 
 Read the [Documentation](https://github.com/Frank-Mayer/days-without-failure/wiki)
 
+### Tested on
+
+- Windows 10
+- Windows 11
+- Windows Server 2016
+- macOS Monterey
+- Arch Linux (Manjaro)
+
+### Licences
+
 | Software      | Licence            |
 |---------------|--------------------|
 | Spring        | Apache License 2.0 |
